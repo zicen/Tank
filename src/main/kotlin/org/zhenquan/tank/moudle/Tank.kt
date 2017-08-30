@@ -1,10 +1,11 @@
 package org.zhenquan.tank.moudle
 
 import org.zhenquan.tank.Config
+import org.zhenquan.tank.business.Moveable
 import org.zhenquan.tank.enums.Direction
 import javax.swing.Painter
 
-class Tank(override var x: Int, override var y: Int) : View {
+class Tank(override var x: Int, override var y: Int) : View ,Moveable{
     override var width: Int = Config.block
 
     override var height: Int = Config.block
