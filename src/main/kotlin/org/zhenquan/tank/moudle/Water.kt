@@ -4,7 +4,7 @@ import org.itheima.kotlin.game.core.Painter
 import org.zhenquan.tank.Config
 import org.zhenquan.tank.business.Blockable
 
-class Water(override var x: Int, override var y: Int) : View , Blockable {
+class Water(override var x: Int, override var y: Int) :  Blockable {
     override var width: Int  = Config.width
     override var height: Int = Config.height
 

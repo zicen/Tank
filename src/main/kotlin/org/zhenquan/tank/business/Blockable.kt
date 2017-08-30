@@ -1,4 +1,6 @@
 package org.zhenquan.tank.business
 
-interface Blockable {
+import org.zhenquan.tank.moudle.View
+
+interface Blockable :View {
 }
