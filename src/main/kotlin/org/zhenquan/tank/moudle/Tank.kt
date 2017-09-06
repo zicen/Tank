@@ -6,7 +6,7 @@ import org.zhenquan.tank.business.Moveable
 import org.zhenquan.tank.enums.Direction
 import javax.swing.Painter
 
-class Tank(override var x: Int, override var y: Int) : Moveable {
+class Tank(override var x: Int, override var y: Int) : Moveable ,Blockable{
 
 
     override val width: Int = Config.block
@@ -59,30 +59,6 @@ class Tank(override var x: Int, override var y: Int) : Moveable {
     override fun notifyCollision(direction: Direction?, block: Blockable?) {
         this.badDirection = direction
     }
-
-    override fun willCollision(block: Blockable): Direction? {
-        var x: Int = this.x
-        var y: Int = this.y
-
-        when (currentDirection) {
-            Direction.UP -> y -= speed
-            Direction.DOWN -> y += speed
-            Direction.LEFT -> x -= speed
-            Direction.RIGHT -> x += speed
-        }
-        //和边界进行检测
-        //越界判断
-        if (x < 0) return Direction.LEFT
-        if (x > Config.width - width) return Direction.RIGHT
-        if (y < 0) return Direction.UP
-        if (y > Config.height - height) return Direction.DOWN
-
-        val collision = checkCollision(block.x, block.y, block.width, block.height
-                , x, y, width, height)
-        return if (collision) currentDirection else null
-
-    }
-
 
 
     fun shot(): Bullet {

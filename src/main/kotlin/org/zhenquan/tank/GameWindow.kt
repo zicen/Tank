@@ -26,6 +26,7 @@ class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width
                     '铁' -> viewsList.add(Steel(columnNum * Config.block, lineNum * Config.block))
                     '水' -> viewsList.add(Water(columnNum * Config.block, lineNum * Config.block))
                     '草' -> viewsList.add(Grass(columnNum * Config.block, lineNum * Config.block))
+                    '敌' -> viewsList.add(Enemy(columnNum * Config.block, lineNum * Config.block))
                 }
                 columnNum++
             };
@@ -106,14 +107,18 @@ class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width
 
 
         //检测攻击者对象与被攻击者对象
-        viewsList.filter { it is Attachable }.forEach { attach->
+        viewsList.filter { (it is Attachable) }.forEach { attach->
             attach as Attachable
             viewsList.filter { it is Sufferable }.forEach sufferTag@{ suffer->
                 suffer as Sufferable
                 if (attach.isCollision(suffer)) {
                     //产生碰撞，通知攻击者
                     attach.notifyAttach(suffer)
-                    suffer.notifySuffer(attach)
+                    val sufferViews = suffer.notifySuffer(attach)
+
+                    sufferViews?.let {
+                        viewsList.addAll(sufferViews)
+                    }
                     return@sufferTag
                 }
             }

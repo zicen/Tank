@@ -1,5 +1,6 @@
 package org.zhenquan.tank.moudle
 
+import org.itheima.kotlin.game.core.Composer
 import org.itheima.kotlin.game.core.Painter
 import org.zhenquan.tank.Config
 import org.zhenquan.tank.business.Attachable
@@ -19,9 +20,10 @@ class Wall(override var x: Int, override var y: Int) : Blockable ,Sufferable,Des
         Painter.drawImage("img/wall.gif", x, y)
     }
 
-    override fun notifySuffer(attach: Attachable) {
+    override fun notifySuffer(attach: Attachable) :Array<View>?{
         blood -= attach.attackPower
-        println("Wall notifySuffer")
+        Composer.play("snd/hit.wav")
+        return arrayOf(Blast(x,y))
     }
 
     override fun isDestroyed(): Boolean  = blood<=0

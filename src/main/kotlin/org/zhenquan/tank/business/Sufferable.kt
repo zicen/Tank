@@ -6,5 +6,5 @@ interface Sufferable : View {
     //生命值
     val blood:Int
 
-    fun notifySuffer(attach:Attachable)
+    fun notifySuffer(attach:Attachable):Array<View>?
 }
