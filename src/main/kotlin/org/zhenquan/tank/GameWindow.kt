@@ -3,6 +3,7 @@ package org.zhenquan.tank
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import org.itheima.kotlin.game.core.Window
+import org.zhenquan.tank.business.AutoMoveable
 import org.zhenquan.tank.business.Blockable
 import org.zhenquan.tank.business.Moveable
 import org.zhenquan.tank.enums.Direction
@@ -89,6 +90,13 @@ class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width
             //如果发现碰撞，就传入碰撞的方向以及碰撞的块
             move.notifyCollision(badDorection, badBlock)
         }
+
+
+        //检测自动移动能力的物体，让他们自己动起来
+        viewsList.filter { it is AutoMoveable }.forEach{
+            (it as AutoMoveable).autoMove()
+        }
+
 
     }
 }
