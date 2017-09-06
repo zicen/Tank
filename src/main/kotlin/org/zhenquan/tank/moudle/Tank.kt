@@ -9,10 +9,10 @@ import javax.swing.Painter
 class Tank(override var x: Int, override var y: Int) : Moveable {
 
 
-    override var width: Int = Config.block
-    override var height: Int = Config.block
+    override val width: Int = Config.block
+    override val height: Int = Config.block
     override var currentDirection = Direction.UP
-    override val speed:Int = 8
+    override val speed: Int = 8
     private var badDirection: Direction? = null
 
     override fun draw() {
@@ -78,10 +78,11 @@ class Tank(override var x: Int, override var y: Int) : Moveable {
         if (y > Config.height - height) return Direction.DOWN
 
         val collision = checkCollision(block.x, block.y, block.width, block.height
-               , x, y, width, height)
-        return if(collision) currentDirection else null
+                , x, y, width, height)
+        return if (collision) currentDirection else null
 
     }
+
     fun checkCollision(x1: Int, y1: Int, w1: Int, h1: Int
                        , x2: Int, y2: Int, w2: Int, h2: Int): Boolean {
         //两个物体的x,y,w,h的比较
@@ -97,6 +98,36 @@ class Tank(override var x: Int, override var y: Int) : Moveable {
     }
 
     fun shot(): Bullet {
-        return Bullet(x,y)
+
+        return Bullet(currentDirection, { bulletWidth, bulletHeight ->
+            //計算子弹的真实坐标
+            val tankX = x
+            val tankY = y
+            val tankWidth = width
+            val tankHeight = height
+
+            var bulletX = 0
+            var bulletY = 0
+
+            when (currentDirection) {
+                Direction.UP -> {
+                    bulletX = tankX + (tankWidth - bulletWidth) / 2
+                    bulletY = tankY - bulletHeight / 2
+                }
+                Direction.DOWN -> {
+                    bulletX = tankX + (tankWidth - bulletWidth) / 2
+                    bulletY = tankY + tankHeight - bulletHeight / 2
+                }
+                Direction.LEFT -> {
+                    bulletX = tankX - bulletWidth / 2
+                    bulletY = tankY + (tankHeight - bulletHeight) / 2
+                }
+                Direction.RIGHT -> {
+                    bulletX = tankX + tankWidth - bulletWidth / 2
+                    bulletY = tankY + (tankHeight - bulletHeight) / 2
+                }
+            }
+            Pair(bulletX, bulletY)
+        })
     }
 }
