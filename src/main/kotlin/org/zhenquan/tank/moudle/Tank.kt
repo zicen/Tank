@@ -12,8 +12,8 @@ class Tank(override var x: Int, override var y: Int) : Moveable {
     override var width: Int = Config.block
     override var height: Int = Config.block
     override var currentDirection = Direction.UP
-    override val speed = 8
-    var badDirection: Direction? = null
+    override val speed:Int = 8
+    private var badDirection: Direction? = null
 
     override fun draw() {
         val s = when (currentDirection) {
@@ -57,7 +57,7 @@ class Tank(override var x: Int, override var y: Int) : Moveable {
 
 
     override fun notifyCollision(direction: Direction?, block: Blockable?) {
-        badDirection = direction
+        this.badDirection = direction
     }
 
     override fun willCollision(block: Blockable): Direction? {
@@ -70,20 +70,29 @@ class Tank(override var x: Int, override var y: Int) : Moveable {
             Direction.LEFT -> x -= speed
             Direction.RIGHT -> x += speed
         }
-        val collision: Boolean = when {
-            block.y + block.height <= y ->//如果阻挡物在运动物的上方的时候，不碰撞
-                false
-        //如果阻挡物在运动物的下方的时候，不碰撞
-            y + height <= block.y ->
-                false
-        //如果阻挡物在运动物的做方的时候，不碰撞
-            block.x + block.width <= x ->
-                false
-            else -> x + width > block.x
-        }
+        //和边界进行检测
+        //越界判断
+        if (x < 0) return Direction.LEFT
+        if (x > Config.width - width) return Direction.RIGHT
+        if (y < 0) return Direction.UP
+        if (y > Config.height - height) return Direction.DOWN
 
-
+        val collision = checkCollision(block.x, block.y, block.width, block.height
+               , x, y, width, height)
         return if(collision) currentDirection else null
 
+    }
+    fun checkCollision(x1: Int, y1: Int, w1: Int, h1: Int
+                       , x2: Int, y2: Int, w2: Int, h2: Int): Boolean {
+        //两个物体的x,y,w,h的比较
+        return when {
+            y2 + h2 <= y1 -> //如果 阻挡物 在运动物的上方时 ，不碰撞
+                false
+            y1 + h1 <= y2 -> //如果 阻挡物 在运动物的下方时 ，不碰撞
+                false
+            x2 + w2 <= x1 -> //如果 阻挡物 在运动物的左方时 ，不碰撞
+                false
+            else -> x1 + w1 > x2
+        }
     }
 }

@@ -44,20 +44,36 @@ class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width
 
     override fun onKeyPressed(event: KeyEvent) {
         when (event.code) {
-            KeyCode.W -> myTank.move(Direction.UP)
-            KeyCode.S -> myTank.move(Direction.DOWN)
-            KeyCode.A -> myTank.move(Direction.LEFT)
-            KeyCode.D -> myTank.move(Direction.RIGHT)
+            KeyCode.W -> {
+                myTank.move(Direction.UP)
+            }
+            KeyCode.S -> {
+                myTank.move(Direction.DOWN)
+            }
+            KeyCode.A -> {
+                myTank.move(Direction.LEFT)
+            }
+            KeyCode.D -> {
+                myTank.move(Direction.RIGHT)
+            }
+            KeyCode.ENTER -> {
+                /*//发射子弹
+                val bullet = myTank.shot()
+                //交给views管理
+                views.add(bullet)*/
+            }
         }
     }
 
     override fun onRefresh() {
+        //判断运动的物体和阻塞的物体是否发生碰撞
+        //1.找到运动的物体
         viewsList.filter { it is Moveable }.forEach { move ->
             move as Moveable
             var badDorection: Direction? = null
             var badBlock: Blockable? = null
 
-            viewsList.filter { it is Blockable }.forEach blockTag@ { block ->
+            viewsList.filter { (it is Blockable) and (move != it) }.forEach blockTag@ { block ->
 
                 block as Blockable
                 //获得碰撞的方向

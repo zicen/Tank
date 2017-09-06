@@ -5,8 +5,8 @@ import org.zhenquan.tank.Config
 import org.zhenquan.tank.business.Blockable
 
 class Steel(override var x: Int, override var y: Int) :Blockable{
-    override var width: Int  = Config.width
-    override var height: Int = Config.height
+    override var width: Int  = Config.block
+    override var height: Int = Config.block
 
     override fun draw() {
         Painter.drawImage("img/steel.gif", x, y)
