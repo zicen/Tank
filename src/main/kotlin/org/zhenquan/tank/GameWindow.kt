@@ -3,17 +3,16 @@ package org.zhenquan.tank
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import org.itheima.kotlin.game.core.Window
-import org.zhenquan.tank.business.AutoMoveable
-import org.zhenquan.tank.business.Blockable
-import org.zhenquan.tank.business.Moveable
+import org.zhenquan.tank.business.*
 import org.zhenquan.tank.enums.Direction
 import org.zhenquan.tank.moudle.*
 import java.io.File
+import java.util.concurrent.CopyOnWriteArrayList
 import javax.swing.text.View
 
 class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width = Config.width, height = Config.height) {
 
-    val viewsList = arrayListOf<org.zhenquan.tank.moudle.View>()
+    val viewsList = CopyOnWriteArrayList<org.zhenquan.tank.moudle.View>()  //使用线程安全的集合CopyOnWriteArrayList
     lateinit var myTank: Tank
     override fun onCreate() {
         val file = File(javaClass.getResource("/map/1.map").path)
@@ -97,7 +96,28 @@ class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width
             (it as AutoMoveable).autoMove()
         }
 
+        //检测销毁
+        viewsList.filter {  it is Destroyable }.forEach{
+            if ((it as Destroyable).isDestroyed()) {
+                viewsList.remove(it)
+            }
 
+        }
+
+
+        //检测攻击者对象与被攻击者对象
+        viewsList.filter { it is Attachable }.forEach { attach->
+            attach as Attachable
+            viewsList.filter { it is Sufferable }.forEach sufferTag@{ suffer->
+                suffer as Sufferable
+                if (attach.isCollision(suffer)) {
+                    //产生碰撞，通知攻击者
+                    attach.notifyAttach(suffer)
+                    suffer.notifySuffer(attach)
+                    return@sufferTag
+                }
+            }
+        }
     }
 }
 
