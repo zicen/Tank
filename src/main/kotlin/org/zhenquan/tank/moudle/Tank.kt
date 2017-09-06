@@ -95,4 +95,8 @@ class Tank(override var x: Int, override var y: Int) : Moveable {
             else -> x1 + w1 > x2
         }
     }
+
+    fun shot(): Bullet {
+        return Bullet(x,y)
+    }
 }

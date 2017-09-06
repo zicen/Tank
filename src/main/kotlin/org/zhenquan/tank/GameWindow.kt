@@ -57,10 +57,10 @@ class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width
                 myTank.move(Direction.RIGHT)
             }
             KeyCode.ENTER -> {
-                /*//发射子弹
+                //发射子弹
                 val bullet = myTank.shot()
                 //交给views管理
-                views.add(bullet)*/
+                viewsList.add(bullet)
             }
         }
     }
