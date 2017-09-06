@@ -14,6 +14,20 @@ class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width
 
     val viewsList = CopyOnWriteArrayList<org.zhenquan.tank.moudle.View>()  //使用线程安全的集合CopyOnWriteArrayList
     lateinit var myTank: Tank
+
+    //游戏是否结束
+    private var gameOver: Boolean = false
+
+    //敌方的数量
+    private var enemyTotalSize = 20
+    //敌方坦克在界面上最多显示几个
+    private var enemyActiveSize = 6
+    //敌方的出生点
+    private val enemyBornLocation = arrayListOf<Pair<Int, Int>>()
+    //出生地点下标
+    private var bornIndex = 0
+
+
     override fun onCreate() {
         val file = File(javaClass.getResource("/map/1.map").path)
         val lines = file.readLines()
@@ -26,7 +40,7 @@ class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width
                     '铁' -> viewsList.add(Steel(columnNum * Config.block, lineNum * Config.block))
                     '水' -> viewsList.add(Water(columnNum * Config.block, lineNum * Config.block))
                     '草' -> viewsList.add(Grass(columnNum * Config.block, lineNum * Config.block))
-                    '敌' -> viewsList.add(Enemy(columnNum * Config.block, lineNum * Config.block))
+                    '敌' -> enemyBornLocation.add(Pair(columnNum * Config.block, lineNum * Config.block))
                 }
                 columnNum++
             };
@@ -35,6 +49,8 @@ class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width
 
         myTank = Tank(Config.block * 10, Config.block * 12)
         viewsList.add(myTank)
+        //添加大本营
+        viewsList.add(Camp(Config.width / 2 - Config.block, Config.height - 96))
     }
 
     override fun onDisplay() {
@@ -67,6 +83,23 @@ class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width
     }
 
     override fun onRefresh() {
+
+        //检测销毁
+        viewsList.filter {  it is Destroyable }.forEach{
+            if ((it as Destroyable).isDestroyed()) {
+
+
+                viewsList.remove(it)
+
+                val destroy = (it as Destroyable).showDestry()
+                destroy?.let {
+                    viewsList.addAll(destroy)
+                }
+            }
+
+        }
+
+        if (gameOver) return
         //判断运动的物体和阻塞的物体是否发生碰撞
         //1.找到运动的物体
         viewsList.filter { it is Moveable }.forEach { move ->
@@ -97,19 +130,13 @@ class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width
             (it as AutoMoveable).autoMove()
         }
 
-        //检测销毁
-        viewsList.filter {  it is Destroyable }.forEach{
-            if ((it as Destroyable).isDestroyed()) {
-                viewsList.remove(it)
-            }
 
-        }
 
 
         //检测攻击者对象与被攻击者对象
         viewsList.filter { (it is Attachable) }.forEach { attach->
             attach as Attachable
-            viewsList.filter { it is Sufferable }.forEach sufferTag@{ suffer->
+            viewsList.filter { (it is Sufferable) and (attach.owner != it) and (attach != it) }.forEach sufferTag@{ suffer->
                 suffer as Sufferable
                 if (attach.isCollision(suffer)) {
                     //产生碰撞，通知攻击者
@@ -122,6 +149,28 @@ class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width
                     return@sufferTag
                 }
             }
+        }
+
+        //檢測自动射击
+        viewsList.filter {  it is AutoShot }.forEach {
+            it as AutoShot
+            val autoShot = it.autoShot()
+            autoShot?.let {
+                viewsList.add(autoShot)
+            }
+        }
+
+        // 检测游戏是否结束
+       if( viewsList.filter { (it is Camp) }.isEmpty() or (enemyTotalSize <=0)){
+           gameOver = true
+       }
+        // 检测敌方出生
+        // 判断当前页面上敌方的数量，小于激活数量
+        if ((enemyTotalSize > 0) and (viewsList.filter { it is Enemy }.size < enemyActiveSize)) {
+            val index = bornIndex % enemyBornLocation.size
+            val pair = enemyBornLocation[index]
+            viewsList.add(Enemy(pair.first, pair.second))
+            bornIndex++
         }
     }
 }
