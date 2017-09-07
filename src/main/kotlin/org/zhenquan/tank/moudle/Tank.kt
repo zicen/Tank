@@ -1,5 +1,6 @@
 package org.zhenquan.tank.moudle
 
+import org.itheima.kotlin.game.core.Composer
 import org.zhenquan.tank.Config
 import org.zhenquan.tank.business.*
 import org.zhenquan.tank.enums.Direction
@@ -82,7 +83,7 @@ class Tank(override var x: Int, override var y: Int) : Moveable ,Blockable,Suffe
         }
     }
     fun shot(): Bullet {
-
+        Composer.play("snd/hit.wav")
         return Bullet(this,currentDirection, { bulletWidth, bulletHeight ->
             //計算子弹的真实坐标
             val tankX = x
