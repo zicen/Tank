@@ -65,7 +65,22 @@ class Tank(override var x: Int, override var y: Int) : Moveable ,Blockable,Suffe
         return arrayOf(Blast(x,y))
     }
 
-
+    fun shit():Shit{
+        return when (currentDirection) {
+            Direction.UP -> {
+                Shit(x,y+Config.block+1,this)
+            }
+            Direction.DOWN -> {
+                Shit(x,y-Config.block+1,this)
+            }
+            Direction.LEFT -> {
+                Shit(x+Config.block+1,y,this)
+            }
+            Direction.RIGHT -> {
+                Shit(x-Config.block+1,y,this)
+            }
+        }
+    }
     fun shot(): Bullet {
 
         return Bullet(this,currentDirection, { bulletWidth, bulletHeight ->

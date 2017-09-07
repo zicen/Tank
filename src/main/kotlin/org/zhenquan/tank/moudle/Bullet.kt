@@ -76,6 +76,5 @@ class Bullet(override val owner: View, direction: Direction, create: (width: Int
 
     override fun notifyAttach(suffer: Sufferable) {
         isDestroyed = true
-        println("bullet notifySuffer")
     }
 }

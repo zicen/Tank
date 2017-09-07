@@ -1,7 +1,9 @@
 package org.zhenquan.tank
 
+import javafx.application.Application
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
+import org.itheima.kotlin.game.core.Painter
 import org.itheima.kotlin.game.core.Window
 import org.zhenquan.tank.business.*
 import org.zhenquan.tank.enums.Direction
@@ -62,27 +64,36 @@ class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width
         viewsList.forEach {
             it.draw()
         }
+
+
     }
 
     override fun onKeyPressed(event: KeyEvent) {
-        when (event.code) {
-            KeyCode.W -> {
-                myTank.move(Direction.UP)
-            }
-            KeyCode.S -> {
-                myTank.move(Direction.DOWN)
-            }
-            KeyCode.A -> {
-                myTank.move(Direction.LEFT)
-            }
-            KeyCode.D -> {
-                myTank.move(Direction.RIGHT)
-            }
-            KeyCode.ENTER -> {
-                //发射子弹
-                val bullet = myTank.shot()
-                //交给views管理
-                viewsList.add(bullet)
+        if (!gameOver) {
+            when (event.code) {
+                KeyCode.W -> {
+                    myTank.move(Direction.UP)
+                }
+                KeyCode.S -> {
+                    myTank.move(Direction.DOWN)
+                }
+                KeyCode.A -> {
+                    myTank.move(Direction.LEFT)
+                }
+                KeyCode.D -> {
+                    myTank.move(Direction.RIGHT)
+                }
+                KeyCode.ENTER -> {
+                    //发射子弹
+                    val bullet = myTank.shot()
+                    //交给views管理
+                    viewsList.add(bullet)
+                }
+                KeyCode.J ->{
+                    val shit = myTank.shit()
+                    viewsList.add(shit)
+                }
+
             }
         }
     }
@@ -90,12 +101,13 @@ class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width
     override fun onRefresh() {
 
         //检测销毁
-        viewsList.filter {  it is Destroyable }.forEach{
+        viewsList.filter { it is Destroyable }.forEach {
             if ((it as Destroyable).isDestroyed()) {
 
-
                 viewsList.remove(it)
-
+                if (it is Enemy) {
+                    enemyTotalSize--
+                }
                 val destroy = (it as Destroyable).showDestry()
                 destroy?.let {
                     viewsList.addAll(destroy)
@@ -104,7 +116,11 @@ class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width
 
         }
 
-        if (gameOver) return
+        if (gameOver) {
+            Painter.drawImage("/img/gameOver.gif", Config.block * 7 - 32, Config.block * 6 - 32)
+            return
+        }
+
         //判断运动的物体和阻塞的物体是否发生碰撞
         //1.找到运动的物体
         viewsList.filter { it is Moveable }.forEach { move ->
@@ -131,17 +147,15 @@ class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width
 
 
         //检测自动移动能力的物体，让他们自己动起来
-        viewsList.filter { it is AutoMoveable }.forEach{
+        viewsList.filter { it is AutoMoveable }.forEach {
             (it as AutoMoveable).autoMove()
         }
 
 
-
-
         //检测攻击者对象与被攻击者对象
-        viewsList.filter { (it is Attachable) }.forEach { attach->
+        viewsList.filter { (it is Attachable) }.forEach { attach ->
             attach as Attachable
-            viewsList.filter { (it is Sufferable) and (attach.owner != it) and (attach != it) }.forEach sufferTag@{ suffer->
+            viewsList.filter { (it is Sufferable) and (attach.owner != it) and (attach != it) }.forEach sufferTag@ { suffer ->
                 suffer as Sufferable
                 if (attach.isCollision(suffer)) {
                     //产生碰撞，通知攻击者
@@ -157,7 +171,7 @@ class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width
         }
 
         //檢測自动射击
-        viewsList.filter {  it is AutoShot }.forEach {
+        viewsList.filter { it is AutoShot }.forEach {
             it as AutoShot
             val autoShot = it.autoShot()
             autoShot?.let {
@@ -166,9 +180,9 @@ class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width
         }
 
         // 检测游戏是否结束
-       if( viewsList.filter { (it is Camp) }.isEmpty() or (enemyTotalSize <=0) or (myTank.blood<=0)){
-           gameOver = true
-       }
+        if (viewsList.filter { (it is Camp) }.isEmpty() or (enemyTotalSize <= 0) or (myTank.blood <= 0)) {
+            gameOver = true
+        }
         // 检测敌方出生
         // 判断当前页面上敌方的数量，小于激活数量
         if ((enemyTotalSize > 0) and (viewsList.filter { it is Enemy }.size < enemyActiveSize)) {
