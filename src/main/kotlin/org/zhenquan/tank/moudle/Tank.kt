@@ -1,18 +1,18 @@
 package org.zhenquan.tank.moudle
 
 import org.zhenquan.tank.Config
-import org.zhenquan.tank.business.Blockable
-import org.zhenquan.tank.business.Moveable
+import org.zhenquan.tank.business.*
 import org.zhenquan.tank.enums.Direction
 import javax.swing.Painter
 
-class Tank(override var x: Int, override var y: Int) : Moveable ,Blockable{
+class Tank(override var x: Int, override var y: Int) : Moveable ,Blockable,Sufferable,Destroyable{
 
 
+    override var blood: Int = Config.tankBlood
     override val width: Int = Config.block
     override val height: Int = Config.block
     override var currentDirection = Direction.UP
-    override val speed: Int = 8
+    override val speed: Int = Config.tankSpeed
     private var badDirection: Direction? = null
 
     override fun draw() {
@@ -60,10 +60,15 @@ class Tank(override var x: Int, override var y: Int) : Moveable ,Blockable{
         this.badDirection = direction
     }
 
+    override fun notifySuffer(attach: Attachable): Array<View>? {
+        blood -= attach.attackPower
+        return arrayOf(Blast(x,y))
+    }
+
 
     fun shot(): Bullet {
 
-        return Bullet(currentDirection, { bulletWidth, bulletHeight ->
+        return Bullet(this,currentDirection, { bulletWidth, bulletHeight ->
             //計算子弹的真实坐标
             val tankX = x
             val tankY = y
@@ -93,5 +98,9 @@ class Tank(override var x: Int, override var y: Int) : Moveable ,Blockable{
             }
             Pair(bulletX, bulletY)
         })
+    }
+
+    override fun isDestroyed(): Boolean {
+        return blood<=0
     }
 }

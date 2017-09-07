@@ -6,7 +6,9 @@ import org.itheima.kotlin.game.core.Window
 import org.zhenquan.tank.business.*
 import org.zhenquan.tank.enums.Direction
 import org.zhenquan.tank.moudle.*
+import java.io.BufferedReader
 import java.io.File
+import java.io.InputStreamReader
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.swing.text.View
 
@@ -29,8 +31,11 @@ class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width
 
 
     override fun onCreate() {
-        val file = File(javaClass.getResource("/map/1.map").path)
-        val lines = file.readLines()
+        //读地图要使用流来读因为我们后面将其打成了jar包
+        //val file = File(javaClass.getResource("/map/1.map").path)
+        val resourceAsStream = javaClass.getResourceAsStream("/map/1.map")
+        val bufferedReader = BufferedReader(InputStreamReader(resourceAsStream, "utf-8"))
+        val lines = bufferedReader.readLines()
         var lineNum = 0
         lines.forEach { line ->
             var columnNum = 0
@@ -161,7 +166,7 @@ class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width
         }
 
         // 检测游戏是否结束
-       if( viewsList.filter { (it is Camp) }.isEmpty() or (enemyTotalSize <=0)){
+       if( viewsList.filter { (it is Camp) }.isEmpty() or (enemyTotalSize <=0) or (myTank.blood<=0)){
            gameOver = true
        }
         // 检测敌方出生

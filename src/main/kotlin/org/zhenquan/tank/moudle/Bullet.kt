@@ -12,7 +12,14 @@ import sun.security.krb5.Config
 /**
  * create 函数返回两个值，是x,y
  */
-class Bullet(direction: Direction, create: (width: Int, height: Int) -> Pair<Int, Int>) : AutoMoveable, Destroyable, Attachable {
+class Bullet(override val owner: View, direction: Direction, create: (width: Int, height: Int) -> Pair<Int, Int>) :
+        AutoMoveable, Destroyable, Attachable, Sufferable {
+    override val blood: Int = 1
+
+    override fun notifySuffer(attach: Attachable): Array<View>? {
+        return arrayOf(Blast(x, y))
+    }
+
     override val attackPower: Int = 1
     override var currentDirection: Direction = direction
     override val speed: Int = 8
@@ -67,7 +74,7 @@ class Bullet(direction: Direction, create: (width: Int, height: Int) -> Pair<Int
         return checkCollision(suffer)
     }
 
-    override fun notifyAttach(suffer: Sufferable){
+    override fun notifyAttach(suffer: Sufferable) {
         isDestroyed = true
         println("bullet notifySuffer")
     }

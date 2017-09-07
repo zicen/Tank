@@ -2,29 +2,25 @@ package org.zhenquan.tank.moudle
 
 import org.itheima.kotlin.game.core.Painter
 import org.zhenquan.tank.Config
-import org.zhenquan.tank.business.AutoMoveable
-import org.zhenquan.tank.business.Blockable
-import org.zhenquan.tank.business.Moveable
+import org.zhenquan.tank.business.*
 import org.zhenquan.tank.enums.Direction
 import java.util.*
 
 /**
  * 敌方坦克
  */
-class Enemy(override var x: Int, override var y: Int) : Moveable ,AutoMoveable,Blockable{
+class Enemy(override var x: Int, override var y: Int) : Moveable, AutoMoveable, Blockable, AutoShot, Sufferable,Destroyable {
 
-
-    override val speed: Int = 8
-
+    override var blood: Int = Config.enemyTankBlood
+    override val speed: Int = Config.enemyTankSpeed
     override var currentDirection: Direction = Direction.DOWN
-    var badDirection: Direction ?= null
-
-
+    var badDirection: Direction? = null
     override val width: Int = Config.block
-
     override val height: Int = Config.block
-
-
+    private var lastShotTime = 0L
+    private val shotFrequency = Config.enemyShotFrequency
+    private var lastMoveTime = 0L
+    private val MoveFrequency = Config.enemyMoveFrequency
     override fun draw() {
         val imagePath = when (currentDirection) {
             Direction.UP -> "img/enemy_1_u.gif"
@@ -36,6 +32,11 @@ class Enemy(override var x: Int, override var y: Int) : Moveable ,AutoMoveable,B
     }
 
     override fun autoMove() {
+        //移动频率
+        val currentTimeMillis = System.currentTimeMillis()
+        if (currentTimeMillis - lastMoveTime < MoveFrequency) return
+        lastMoveTime = currentTimeMillis
+
         //当前方向是 阻挡方向时return
         if (currentDirection == badDirection) {
             currentDirection = rdmDirection(badDirection)
@@ -61,9 +62,10 @@ class Enemy(override var x: Int, override var y: Int) : Moveable ,AutoMoveable,B
     override fun notifyCollision(direction: Direction?, block: Blockable?) {
         badDirection = direction
     }
-    private fun rdmDirection(bad:Direction?):Direction{
+
+    private fun rdmDirection(bad: Direction?): Direction {
         val i = Random().nextInt(4)
-        val direction = when(i){
+        val direction = when (i) {
             0 -> Direction.UP
             1 -> Direction.DOWN
             2 -> Direction.LEFT
@@ -77,4 +79,55 @@ class Enemy(override var x: Int, override var y: Int) : Moveable ,AutoMoveable,B
         }
         return direction
     }
+
+    override fun autoShot(): View? {
+        //射击频率
+        val currentTimeMillis = System.currentTimeMillis()
+        if (currentTimeMillis - lastShotTime < shotFrequency) return null
+        lastShotTime = currentTimeMillis
+        return Bullet(this,currentDirection, { bulletWidth, bulletHeight ->
+            //計算子弹的真实坐标
+            val tankX = x
+            val tankY = y
+            val tankWidth = width
+            val tankHeight = height
+
+            var bulletX = 0
+            var bulletY = 0
+
+            when (currentDirection) {
+                Direction.UP -> {
+                    bulletX = tankX + (tankWidth - bulletWidth) / 2
+                    bulletY = tankY - bulletHeight / 2
+                }
+                Direction.DOWN -> {
+                    bulletX = tankX + (tankWidth - bulletWidth) / 2
+                    bulletY = tankY + tankHeight - bulletHeight / 2
+                }
+                Direction.LEFT -> {
+                    bulletX = tankX - bulletWidth / 2
+                    bulletY = tankY + (tankHeight - bulletHeight) / 2
+                }
+                Direction.RIGHT -> {
+                    bulletX = tankX + tankWidth - bulletWidth / 2
+                    bulletY = tankY + (tankHeight - bulletHeight) / 2
+                }
+            }
+            Pair(bulletX, bulletY)
+        })
+
+    }
+
+    override fun notifySuffer(attach: Attachable): Array<View>? {
+        if (attach.owner is Enemy) {
+            return null
+        }
+        blood -= attach.attackPower
+        return arrayOf(Blast(x, y))
+    }
+
+    override fun isDestroyed(): Boolean {
+        return blood <=0
+    }
+
 }
