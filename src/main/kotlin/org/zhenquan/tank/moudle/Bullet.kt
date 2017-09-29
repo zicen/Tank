@@ -1,5 +1,6 @@
 package org.zhenquan.tank.moudle
 
+import org.itheima.kotlin.game.core.Composer
 import org.itheima.kotlin.game.core.Painter
 import org.zhenquan.tank.business.Attachable
 import org.zhenquan.tank.business.AutoMoveable

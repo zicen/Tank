@@ -3,6 +3,7 @@ package org.zhenquan.tank
 import javafx.application.Application
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
+import org.itheima.kotlin.game.core.Composer
 import org.itheima.kotlin.game.core.Painter
 import org.itheima.kotlin.game.core.Window
 import org.zhenquan.tank.business.*
@@ -118,6 +119,7 @@ class GameWindow : Window(title = "坦克大战", icon = "img/symbol.gif", width
 
         if (gameOver) {
             Painter.drawImage("/img/gameOver.gif", Config.block * 7 - 32, Config.block * 6 - 32)
+            Composer.play("snd/start.wav")
             return
         }
 
